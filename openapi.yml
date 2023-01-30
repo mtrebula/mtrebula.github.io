@@ -1,0 +1,1528 @@
+openapi: 3.0.3
+info:
+  title: Swagger Readmio - OpenAPI 3.0
+  description: Readmio doc
+  version: 1.0.11
+
+servers:
+  - url: https://staging-readmio.herokuapp.com
+  - url: https://readmio.herokuapp.com/
+  
+tags:
+  - name: well-known
+    description: Everything not related to well-known app.
+  - name: book
+    description: Everything related to Book.
+  - name: campaign
+    description: Everything related to Campaign.
+  - name: greeting
+    description: Everything related to Greeting.
+  - name: hello
+    description: Everything related to force-upgrade.
+  - name: language
+    description: Everything related to Language.
+  - name: legal
+    description: Everything related to Legal.
+  - name: link
+    description: Everything related to Deep link.
+  - name: package
+    description: Everything raleted to Package.
+  - name: promo-code
+    description: Everything raleted to Promocode.
+  - name: sound
+    description: Everything raleted to Sound.
+
+paths:
+  
+  /legal-pages/{page_type}/:
+    get:
+      tags:
+        - legal
+      summary: Get legal pages.
+      description: Returns legal page.
+      operationId: getLegalPage
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/page_type'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            text/html:
+              schema:
+                type: string
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      
+  /links/{url_id}:
+    get:
+      tags:
+        - link
+      summary: Get link to redirect.
+      description: Get link to redirect.
+      operationId: getDeepLink
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/url_id'
+      responses:
+        '200':
+          description: Successful operation.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error
+  
+  /{token}loaderio-{secret}/:
+    get:
+      tags:
+        - well-known
+      summary: Get loaderio secret.
+      description: Returns loaderio secret.
+      operationId: verifyLoaderioSecret
+      parameters: 
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/token'
+        - $ref: '#/components/parameters/secret'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            text/json:
+              schema:
+                type: string
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+  
+  # v1 endpoints
+  /v1/books/:
+    get:
+      tags:
+        - book
+      summary: Get list of the books.
+      description: Get list of the books.
+      operationId: getBooks
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Book'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+        
+  /v1/books/{book_id}/:
+    get:
+      tags:
+        - book
+      summary: Get detail of the book.
+      operationId: getBookDetail
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/book_id'
+      responses:
+        '200':
+          description: Returns detail of the book.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error
+      security:
+        - api_key: []
+        
+  /v1/books/{book_id}/data/:
+    get:
+      tags:
+        - book
+      summary: Get data of the book.
+      operationId: getBookData
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/book_id'
+      responses:
+        '200':
+          description: Returns book data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookData'
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+        
+  /v1/books/{book_id}/pdf/:
+    get:
+      tags:
+        - book
+      summary: Get pdf of the book.
+      operationId: getBookPdf
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/book_id'
+      responses:
+        '200':
+          description: Returns book in pdf format.
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/books/{book_id}/rate/:
+    post:
+      tags:
+        - book
+      summary: Rate book or update previous rating.
+      operationId: rateBook
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/book_id'
+      requestBody:
+        description: Rate object that is sent to rate the book.
+        required: true
+        content:
+          application/json:
+            schema: 
+              properties:
+                rating: 
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                previous_rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+      responses:
+        '201':
+          description: Book was successfully rated.
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/books/{book_id}/qr/:
+    get:
+      tags:
+        - book
+      summary: Returns QR code for the book.
+      operationId: getQrCode
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/book_id'
+      responses:
+        '200':
+          # FIXME returns QR code
+          description: Returns QR code for the book.
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/books/categories/:
+    get:
+      tags:
+        - book
+      summary: Get all categories of books.
+      operationId: getCategories
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/unpublished'
+      responses:
+        '200':
+          description: Returns list of book categories.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Categories'
+        '404':
+          description: Book not found.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+        
+  # FIXME response
+  /v1/books/categories/{category_id}/:
+    get:
+      tags:
+        - book
+      summary: Get category by id.
+      operationId: getCategory
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/category_id'
+        - $ref: '#/components/parameters/unpublished'
+        - $ref: '#/components/parameters/show_premium'
+      responses:
+        '200':
+          description: Returns detail of the category.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Category'
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/books/reading-lists/{reading_list_id}/:
+    get:
+      tags:
+        - book
+      summary: Returns detail of reading list.
+      operationId: getReadingList
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/reading_list_id'
+        - $ref: '#/components/parameters/unpublished'
+      responses:
+        '200':
+          description: Returns detail of the reading list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/ReadingList'
+        '404':
+          description: Book not found.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/books/explorer-set/:
+    get:
+      tags:
+        - book
+      # FIXME summary
+      summary: Returns list of books.
+      operationId: getExplorerSet
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/unpublished'
+      responses:
+        '200':
+        #FIXME same for desc
+          description: Returns list of languages.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/ExplorerPick'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/books/editors-pick/:
+    get:
+      tags:
+        - book
+      summary: Returns list of books, picked by editors.
+      operationId: getEditorsPick
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+      responses:
+        '200':
+          description: Returns list of books that were picked by editors.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/EditorsPick'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  
+  ## FIXME get and request body
+  # /v1/books/search/:
+  #   get:
+  #     tags:
+  #       - book
+  #     summary: Returns book searched by filter param.
+  #     operationId: searchBooks
+  #     parameters:
+  #       - $ref: '#/components/parameters/xApiKey'
+  #       - $ref: '#/components/parameters/acceptedLanguage'
+  #       - $ref: '#/components/parameters/platform'
+  #     requestBody:
+  #       description: Input for search the books.
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/SearchBooks'
+  #     responses:
+  #       '200':
+  #         description: Returns book data.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items: 
+  #                 $ref: '#/components/schemas/BookListItem'
+  #       '405':
+  #         description: HTTP method not allowed.
+  #       '500':
+  #         description: Server error.
+  #     security:
+  #       - api_key: []
+  
+  /v1/sounds/{sound_id}/:
+    get:
+      tags:
+        - sound
+      summary: Returns sound data.
+      operationId: getSound
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/sound_id'
+      responses:
+        '200':
+          description: Returns sound data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Sound'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error
+      security:
+        - api_key: []
+        
+  /v1/languages/:
+    get:
+      tags:
+        - language
+      summary: Returns list of languages.
+      operationId: getLanguages
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Returns list of languages.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Language'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/campaigns/:
+    get:
+      tags:
+        - campaign
+      summary: Returns list of campaigns.
+      operationId: getCampaigns
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Returns list of campaigns.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Campaign'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error
+      security:
+        - api_key: []
+        
+  /v1/campaigns/{campaign_id}/:
+    get:
+      tags:
+        - campaign
+      summary: Returns campaign data.
+      operationId: getCampaign
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/campaign_id'
+      responses:
+        '200':
+          description: Returns campaign data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Campaign'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/events/packages/:
+    get:
+      tags:
+        - package
+      summary: Returns list of packages.
+      operationId: getPackages
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+      responses:
+        '200':
+          description: Returns list of packages.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Package'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+    
+  /v1/events/packages/{package_id}/:
+    get:
+      tags:
+        - package
+      summary: Returns package data.
+      operationId: getPackage
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/package_id'
+      responses:
+        '200':
+          description: Returns package data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Package'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v1/hello/:
+    post:
+      tags:
+        - hello
+      summary:  Returns whether app should be updated.
+      operationId: hello
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        description: Request body with version, platform and build_number information.
+        content:
+          application/json:
+            schema: 
+              properties:
+                version: 
+                  type: string
+                platform:
+                  type: string
+                  enum: ['ios', 'android']
+                build_number:
+                  type: integer
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hello'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+                  
+  
+  # promo-cody este budu upravene
+  /v1/promo-codes/validate/:
+    post:
+      tags:
+        - promo-code
+      summary: Validates promo-code from request body.
+      operationId: validatePromocode
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        description: Promo-code to validate.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromoCode'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromoCodeOutput'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+          
+  /v1/promo-codes/redeem/:
+    post:
+      tags: 
+        - promo-code
+      summary: Redeem promo code.
+      operationId: redeemPromocode
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+      requestBody:
+        description: Promo-code to reddeem.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromoCode'
+      responses:
+        '200':
+          description: Successful operation.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      
+  # FIXME get cannot have requestBody
+  # /v1/greetings/greeting/:
+  #   get:
+  #     tags:
+  #       - greeting
+  #     summary: Get greeting
+  #     operationId: getGreeting
+  #     parameters:
+  #       - $ref: '#/components/parameters/xApiKey'
+  #       - $ref: '#/components/parameters/acceptedLanguage'
+  #       - $ref: '#/components/parameters/platform'
+  #     requestBody:
+  #       description: Input for greeting.
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             $ref: '#/components/schemas/GreetingInput'
+  #     responses:
+  #       '200':
+  #         description: Returns greeting.
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/Greeting'
+          # '405':
+          #   description: HTTP method not allowed.
+  #       '500':
+  #         description: Server error
+  #     security:
+  #       - api_key: []
+      
+  
+  # v2 endpoints
+  /v2/books/{book_id}/:
+    get:
+      tags:
+        - book
+      summary: Get detail of the book.
+      operationId: getBookV2
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/book_id'
+      responses:
+        '200':
+          description: Returns detail of the book for v2 api.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookV2'
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+        
+  /v2/books/categories/:
+    get:
+      tags:
+        - book
+      summary: Get all categories of books.
+      operationId: getCategoriesV2
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/language_key'
+        - $ref: '#/components/parameters/unpublished'
+      responses:
+        '200':
+          description: Returns list of book categories for v2 api.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoriesV2'
+        '404':
+          description: Book not found.
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+  
+  /v2/campaigns/:
+    get:
+      tags:
+        - campaign
+      summary: Returns list of campaigns for v2 api.
+      operationId: getCampaignsV2
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/region'
+        - $ref: '#/components/parameters/unpublished'
+      responses:
+        '200':
+          description: Returns list of campaigns for v2 api.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/CampaignV2'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+        
+  # FIXME should be pk?
+  /v2/campaigns/{campaign_id}/:
+    get:
+      tags:
+        - campaign
+      summary: Returns campaign data for v2 api.
+      operationId: getCampaignV2
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/campaign_id'
+      responses:
+        '200':
+          description: Returns campaign data for v2 api.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignV2'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+        
+  /v2/languages/:
+    get:
+      tags:
+        - language
+      summary: Returns list of languages for v2 api.
+      operationId: getLanguagesV2
+      parameters:
+        - $ref: '#/components/parameters/xApiKey'
+        - $ref: '#/components/parameters/acceptedLanguage'
+        - $ref: '#/components/parameters/platform'
+        - $ref: '#/components/parameters/unpublished'
+      responses:
+        '200':
+          description: Returns list of languages for v2 api.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/LanguageV2'
+        '405':
+          description: HTTP method not allowed.
+        '500':
+          description: Server error.
+      security:
+        - api_key: []
+        
+  #FIXME needed? 
+  # /v1/user/login/:
+  # /v1/user/profile/:
+  # /v1/user/profiles/{user_id}/:
+        
+  # nie je potrebne riesit
+  # /app-ads.txt:
+  # /.well-known/apple-app-site-association:
+  # /.well-known/assetlinks.json:
+
+components:
+  parameters:
+    acceptedLanguage:
+      name: Accept-Language
+      in: header
+      description: Current supported languages are available at v1/languages/ endoint.
+      schema:
+        type: string
+        enum: ["sk", "cs", "en"]
+      required: true
+    book_id:
+      name: book_id
+      in: path
+      schema: 
+        type: string
+      required: true
+    campaign_id:
+      name: campaign_id
+      in: path
+      schema:
+        type: string
+      required: true
+    category_id:
+      name: category_id
+      in: path
+      schema:
+        type: string
+      required: true
+    language_key:
+      name: language_key
+      in: query
+      schema:
+        type: string
+        maxLength: 8
+      required: True
+    package_id:
+      name: package_id
+      in: path
+      schema:
+        type: string
+      required: true
+    page_type:
+      name: page_type
+      in: path
+      schema:
+        type: string
+        enum:
+          - "terms"
+          - "privacy"
+          - "contributors"
+          - "opensource"
+          - "legal"
+          - "other"
+      required: true
+    platform:
+      name: Platform
+      in: header
+      schema:
+        type: string
+        enum: ["IOS", "ANDROID"]
+    reading_list_id:
+      name: reading_list_id
+      in: path
+      schema:
+        type: string
+      required: true
+    region:
+      name: region
+      in: query
+      schema:
+        type: string
+      required: true
+    secret:
+      description: Secret used to veirfy loaderio secret.
+      name: secret
+      in: path
+      schema:
+        type: string
+      required: true
+    show_premium:
+      name: show_premium
+      in: query
+      schema:
+        type: string
+    sound_id:
+      name: sound_id
+      in: path
+      schema:
+        type: string
+      required: true
+    token:
+      name: token
+      description:  Token used to call loaderio endpoint.
+      in: path
+      schema:
+        type: string
+      required: true
+    unpublished:
+      description: Returns also unpublished books.
+      name: unpublished
+      schema:
+        type: boolean
+        default: False
+      in: query
+    url_id:
+      name: url_id
+      description: Link to redirect.
+      in: path
+      schema:
+        type: string
+      required: true
+    user_id:
+      name: user_id
+      in: path
+      schema:
+        type: string
+      required: true
+    xApiKey:
+      name: X-API-KEY
+      in: header
+      required: true
+      schema:
+        type: string
+      
+  schemas:
+    AcusticModel:
+      type: object
+      properties:
+        id:
+          type: integer
+        acoustic_model:
+          type: string
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+    
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+    
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+        description:
+          type: string
+        dynamic_link:
+          type: string
+        is_premium:
+          type: boolean
+        is_published:
+          type: boolean
+        is_featured:
+          type: boolean
+        reading_time:
+          type: integer
+        widget_title_alignment:
+          type: string
+          enum: ["up", "down", "below", "big"]
+        widget_animation:
+          type: string
+          enum: 
+            - "off"
+            - "ken_burns"
+            - "left"
+            - "anim_3"
+            - "anim_4"
+            - "anim_5"
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+        min_age:
+          type: integer
+          enum: [3, 5, 8, 11]
+        language:
+            $ref: '#/components/schemas/Language'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+            
+    BookData:
+      type: object
+      properties:
+        id:
+          type: integer
+        book_html_file:
+          type: string
+        intro_sound:
+          type: string
+        grammar_model:
+          type: string
+        language_model:
+          type: string
+        acoustic_model:
+          $ref: '#/components/schemas/AcusticModel'
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+      
+    BookListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+        is_premium:
+          type: boolean
+        reading_time:
+          type: integer
+        min_age:
+          type: integer
+          enum: [3, 5, 8, 11]
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+    
+    BookV2:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        dynamic_link:
+          type: string
+        is_premium:
+          type: boolean
+        is_published:
+          type: boolean
+        is_featured:
+          type: boolean
+        reading_time:
+          type: integer
+        widget_title_alignment:
+          type: string
+          enum: ["up", "down", "below", "big"]
+        widget_animation:
+          type: string
+          enum: 
+            - "off"
+            - "ken_burns"
+            - "left"
+            - "anim_3"
+            - "anim_4"
+            - "anim_5"
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+        min_age:
+          type: integer
+          enum: [3, 5, 8, 11]
+        language:
+            $ref: '#/components/schemas/Language'
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        things_to_discuss:
+          type: array
+          items:
+            type: string
+            
+    BookWithCategoriesListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        image:
+          type: string
+        is_premium:
+          type: boolean
+        is_featured:
+          type: boolean
+        reading_time:
+          type: integer
+        min_age:
+          type: integer
+          enum: [3, 5, 8, 11]
+        widget_title_alignment:
+          type: string
+          enum: ["up", "down", "below", "big"]
+        widget_animation:
+          type: string
+          enum: 
+            - "off"
+            - "ken_burns"
+            - "left"
+            - "anim_3"
+            - "anim_4"
+            - "anim_5"
+        text_color:
+          type: string
+          maxLength: 10
+        widget_color_1:
+          type: string
+          maxLength: 10
+        widget_color_2:
+          type: string
+          maxLength: 10
+        widget_color_3:
+          type: string
+          maxLength: 10
+        widget_color_4:
+          type: string
+          maxLength: 10
+          
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+    
+    CampaignV2:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        position:
+          type: integer
+          minimum: 0
+        have_detail:
+          type: boolean
+          default: True
+        is_show_per_user:
+          type: boolean
+          default: False
+        number_of_shows:
+          type: integer
+          default: 5
+          minimum: 0
+        is_for_free_users:
+          type: boolean
+          default: True
+        is_for_paid_users:
+          type: boolean
+          default: True
+        # FIXME navigation_type
+        navigation:
+          type: string
+          maxLength: 10
+          enum: ["browser", "deep", "email"]
+        action_button_text:
+          type: string
+          maxLength: 64
+        image_list:
+          type: string
+        image_detail:
+          type: string
+        updated_at:
+          type: string
+          format: date
+    
+    Categories:
+      type: array
+      items:
+        $ref: '#/components/schemas/Category'
+    
+    CategoriesV2:
+      type: array
+      items:
+        $ref: '#/components/schemas/CategoryV2'
+        
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        default_name:
+          type: string
+        book_count: 
+          type: integer
+        category_translations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryTranslation'
+          
+    CategoryV2:
+      type: object
+      properties:
+        id:
+          type: integer
+        default_name:
+          type: string
+        category_translations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryTranslation'
+      
+    CategoryTranslation:
+      type: object
+      properties:
+        id:
+          type: integer
+        translated_name:
+          type: string
+          maxLength: 20
+        translated_short_name:
+          type: string
+          maxLength: 10
+          default: "not-set"
+        language:
+          type: string
+        
+    EditorsPick:
+      type: object
+      properties:
+        name: 
+          type: string
+        description:
+          type: string
+        updated_at:
+          type: string
+          format: date
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
+            
+    ExplorerPick:
+      type: object
+      properties:
+        name: 
+          type: string
+        description:
+          type: string
+        updated_at:
+          type: string
+          format: date
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookWithCategoriesListItem'
+    
+    Greeting:
+      type: object
+      properties:
+        text:
+          type: string
+          maxLength: 512
+    
+    GreetingInput:
+      type: object
+      properties:
+        language: 
+          type: string
+          maxLength: 8
+        region:
+          type: string
+          maxLength: 8
+        local_time:
+          type: string
+          format: date
+    
+    Hello:
+      type: object
+      properties:
+        force_update:
+          description: Boolean value whether app should be updated or not.
+          type: boolean
+        ip_language:
+          description: Ip of language.
+      required:
+        - force_update
+        - ip_language
+        
+    Language:
+      type: object
+      properties:
+        id:
+          description: Id of language 
+          type: integer
+        language_key:
+          type: string
+          maxLength: 8
+        language_name:
+          type: string
+          maxLength: 64
+        is_published:
+          type: boolean
+        new_book_fcm_topic:
+          type: string
+          maxLength: 255
+        order:
+          type: integer
+          default: 0
+          minimum: 0
+          
+    LanguageV2:
+      type: object
+      properties:
+        id:
+          description: Id of language 
+          type: integer
+        language_key:
+          type: string
+          maxLength: 8
+        language_name:
+          type: string
+          maxLength: 64
+        is_published:
+          type: boolean
+        new_book_fcm_topic:
+          type: string
+          maxLength: 255
+        order:
+          type: integer
+          default: 0
+          minimum: 0
+        preferred_acoustic_model:
+          $ref: '#/components/schemas/AcusticModel'
+          
+    Package:
+      type: object
+      properties:
+        id:
+          type: integer
+          
+    Sound:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          maxLength: 256
+        description:
+          type: string
+          maxLength: 1024
+        sound_mp2:
+          type: string
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/SoundTag'
+        created_at:
+          type: string
+          format: date
+        updated_at:
+          type: string
+          format: date
+          
+    SoundTag:
+      type: object
+      properties:
+        tag:
+          type: string
+          maxLength: 128
+        
+    PromoCode:
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          maxLength: 64
+          
+    PromoCodeOutput:
+      required: 
+        - android_subscription
+        - ios_subscription
+      properties:
+        adapty_paywall:
+          type: string
+        android_subscription:
+          type: object
+          properties:
+            product_id:
+              type: string
+        ios_subscription:
+          type: object
+          properties:
+            product_id:
+              type: string
+          
+    ReadingList:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        updated_at:
+          type: string
+          format: date
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookWithCategoriesListItem'
+              
+    SearchBooks:
+      type: object
+      properties:
+        language_key:
+          type: string
+          maxLength: 8
+        unpublished:
+          type: boolean
+        q:
+          type: string
+          minLength: 1
+          maxLength: 100
+
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
